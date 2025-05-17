@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import dynamic from "next/dynamic";
 
 import "./globals.css";
 import { ThemeProvider } from "./provider";
-import MouseTracker from "@/components/MouseTracker";
-import ParticleTrail from "@/components/ParticleTrail";
+
+// Dynamically import browser-specific components with SSR disabled
+const MouseTracker = dynamic(() => import("@/components/MouseTracker"), {
+  ssr: false,
+});
+const ParticleTrail = dynamic(() => import("@/components/ParticleTrail"), {
+  ssr: false,
+});
 
 const inter = Inter({ subsets: ["latin"] });
 
