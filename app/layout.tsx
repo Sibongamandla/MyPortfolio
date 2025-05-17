@@ -3,11 +3,13 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "./provider";
+import MouseTracker from "@/components/MouseTracker";
+import ParticleTrail from "@/components/ParticleTrail";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Adrian's Portfolio",
+  title: "Sibongamandla's Portfolio",
   description: "Modern & Minimal JS Mastery Portfolio",
 };
 
@@ -28,6 +30,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* Mouse animation components */}
+          <MouseTracker />
+          <ParticleTrail />
+
           {children}
         </ThemeProvider>
       </body>
