@@ -1,8 +1,16 @@
 import { FaLocationArrow } from "react-icons/fa6";
+import dynamic from "next/dynamic";
 
 import MagicButton from "./MagicButton";
 import { Spotlight } from "./ui/Spotlight";
-import { TextGenerateEffect } from "./ui/TextGenerateEffect";
+
+// Dynamically import components that use browser APIs
+const TextGenerateEffect = dynamic(
+  () => import("./ui/TextGenerateEffect").then((mod) => mod.TextGenerateEffect),
+  {
+    ssr: false,
+  }
+);
 
 const Hero = () => {
   return (
