@@ -117,7 +117,7 @@ export const InfiniteMovingCards = ({
                 {/* add this div for the profile img */}
                 <div className="me-3">
                   <img
-                    src="/profile.svg"
+                    src="/person-circle.svg"
                     alt="Client Profile"
                     className="w-12 h-12 rounded-full"
                   />
