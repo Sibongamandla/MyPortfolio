@@ -141,19 +141,19 @@ export const testimonials = [
   {
     quote:
       "Working with Sibongamandla was an excellent experience. His expertise in web development and software engineering brought our project to the next level. The website he created for us perfectly represents our brand and has significantly improved our client acquisition.",
-    name: "Client A",
+    name: "iSu Technologies",
     title: "Technology Company",
   },
   {
     quote:
       "Sibongamandla and his team delivered an exceptional solution for our municipal website. His technical knowledge and attention to detail resulted in a user-friendly, responsive site that has greatly improved our online presence and service to our constituents.",
-    name: "Client B",
+    name: "Umdoni Municipality",
     title: "Government Organization",
   },
   {
     quote:
       "The website created by Sibongamandla exceeded our expectations. His understanding of our requirements and ability to translate them into an engaging, functional website was impressive. We highly recommend his services.",
-    name: "Client C",
+    name: "Bonsai Engineering",
     title: "Engineering Firm",
   },
 ];
