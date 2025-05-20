@@ -39,29 +39,55 @@ export const BackgroundGradientAnimation = ({
   const [curY, setCurY] = useState(0);
   const [tgX, setTgX] = useState(0);
   const [tgY, setTgY] = useState(0);
-  useEffect(() => {
-    // Check if document is available (client-side only)
-    if (typeof document === "undefined") return;
+  const [isMounted, setIsMounted] = useState(false);
 
-    document.body.style.setProperty(
-      "--gradient-background-start",
-      gradientBackgroundStart
-    );
-    document.body.style.setProperty(
-      "--gradient-background-end",
-      gradientBackgroundEnd
-    );
-    document.body.style.setProperty("--first-color", firstColor);
-    document.body.style.setProperty("--second-color", secondColor);
-    document.body.style.setProperty("--third-color", thirdColor);
-    document.body.style.setProperty("--fourth-color", fourthColor);
-    document.body.style.setProperty("--fifth-color", fifthColor);
-    document.body.style.setProperty("--pointer-color", pointerColor);
-    document.body.style.setProperty("--size", size);
-    document.body.style.setProperty("--blending-value", blendingValue);
+  // Only run after component has mounted
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
+  // This effect only runs on the client after the component has mounted
   useEffect(() => {
+    if (!isMounted) return;
+
+    try {
+      // These will only execute on the client side
+      document.body.style.setProperty(
+        "--gradient-background-start",
+        gradientBackgroundStart
+      );
+      document.body.style.setProperty(
+        "--gradient-background-end",
+        gradientBackgroundEnd
+      );
+      document.body.style.setProperty("--first-color", firstColor);
+      document.body.style.setProperty("--second-color", secondColor);
+      document.body.style.setProperty("--third-color", thirdColor);
+      document.body.style.setProperty("--fourth-color", fourthColor);
+      document.body.style.setProperty("--fifth-color", fifthColor);
+      document.body.style.setProperty("--pointer-color", pointerColor);
+      document.body.style.setProperty("--size", size);
+      document.body.style.setProperty("--blending-value", blendingValue);
+    } catch (error) {
+      console.error("Error setting CSS properties:", error);
+    }
+  }, [
+    isMounted,
+    gradientBackgroundStart,
+    gradientBackgroundEnd,
+    firstColor,
+    secondColor,
+    thirdColor,
+    fourthColor,
+    fifthColor,
+    pointerColor,
+    size,
+    blendingValue,
+  ]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     function move() {
       if (!interactiveRef.current) {
         return;
@@ -74,7 +100,7 @@ export const BackgroundGradientAnimation = ({
     }
 
     move();
-  }, [tgX, tgY]);
+  }, [tgX, tgY, curX, curY, isMounted]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (interactiveRef.current) {
@@ -86,11 +112,14 @@ export const BackgroundGradientAnimation = ({
 
   const [isSafari, setIsSafari] = useState(false);
   useEffect(() => {
-    // Check if navigator is available (client-side only)
-    if (typeof navigator === "undefined") return;
+    if (!isMounted) return;
 
-    setIsSafari(/^((?!chrome|android).)*safari/i.test(navigator.userAgent));
-  }, []);
+    try {
+      setIsSafari(/^((?!chrome|android).)*safari/i.test(navigator.userAgent));
+    } catch (error) {
+      console.error("Error detecting browser:", error);
+    }
+  }, [isMounted]);
 
   return (
     <div
@@ -170,7 +199,7 @@ export const BackgroundGradientAnimation = ({
           )}
         ></div>
 
-        {interactive && (
+        {interactive && isMounted && (
           <div
             ref={interactiveRef}
             onMouseMove={handleMouseMove}

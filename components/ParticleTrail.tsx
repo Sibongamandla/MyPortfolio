@@ -1,110 +1,122 @@
 "use client";
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Particle {
   x: number;
   y: number;
   size: number;
-  color: string;
   speedX: number;
   speedY: number;
-  life: number;
-  maxLife: number;
+  color: string;
 }
 
 const ParticleTrail = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
-  const mousePositionRef = useRef({ x: 0, y: 0 });
-  const animationFrameRef = useRef<number>(0);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const animationRef = useRef<number>();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const colors = ["#8b5cf6", "#6366f1", "#3b82f6", "#a855f7", "#d946ef"];
-
+  // Only run after component has mounted
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set canvas to full window size
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    // Track mouse movement
-    const handleMouseMove = (e: MouseEvent) => {
-      mousePositionRef.current = { x: e.clientX, y: e.clientY };
-      // Add particles on mouse move
-      addParticles(5);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-
-    // Add particles function
-    const addParticles = (count: number) => {
-      for (let i = 0; i < count; i++) {
-        const size = Math.random() * 5 + 1;
-        particlesRef.current.push({
-          x: mousePositionRef.current.x,
-          y: mousePositionRef.current.y,
-          size,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          speedX: Math.random() * 2 - 1,
-          speedY: Math.random() * 2 - 1,
-          life: 0,
-          maxLife: Math.random() * 30 + 10,
-        });
+    setIsMounted(true);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
+  }, []);
 
-    // Animation loop
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  useEffect(() => {
+    if (!isMounted || !canvasRef.current) return;
 
-      // Update and draw particles
-      particlesRef.current.forEach((particle, index) => {
-        particle.x += particle.speedX;
-        particle.y += particle.speedY;
-        particle.size -= 0.05;
-        particle.life += 1;
+    try {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-        if (particle.size <= 0.3 || particle.life >= particle.maxLife) {
-          particlesRef.current.splice(index, 1);
-          return;
+      // Set canvas to full window size
+      const handleResize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
+
+      handleResize();
+      window.addEventListener("resize", handleResize);
+
+      // Mouse movement handler
+      const handleMouseMove = (e: MouseEvent) => {
+        mouseRef.current = { x: e.clientX, y: e.clientY };
+        // Add new particles on mouse move
+        for (let i = 0; i < 3; i++) {
+          addParticle(e.clientX, e.clientY);
+        }
+      };
+
+      window.addEventListener("mousemove", handleMouseMove);
+
+      // Add a particle
+      const addParticle = (x: number, y: number) => {
+        const colors = ["#8a2be2", "#ff69b4", "#1e90ff", "#32cd32"];
+        particlesRef.current.push({
+          x,
+          y,
+          size: Math.random() * 5 + 1,
+          speedX: Math.random() * 2 - 1,
+          speedY: Math.random() * 2 - 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        });
+      };
+
+      // Animation loop
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Update and draw particles
+        for (let i = 0; i < particlesRef.current.length; i++) {
+          const p = particlesRef.current[i];
+
+          p.x += p.speedX;
+          p.y += p.speedY;
+          p.size -= 0.05;
+
+          if (p.size <= 0) {
+            particlesRef.current.splice(i, 1);
+            i--;
+            continue;
+          }
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
         }
 
-        // Draw particle
-        ctx.fillStyle = particle.color;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
+        animationRef.current = requestAnimationFrame(animate);
+      };
 
-        // Add glow effect
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = particle.color;
-      });
+      animate();
 
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
+      // Cleanup
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("mousemove", handleMouseMove);
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    } catch (error) {
+      console.error("Error in ParticleTrail:", error);
+      return () => {};
+    }
+  }, [isMounted]);
 
-    animate();
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, []);
+  if (!isMounted) return null;
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full pointer-events-none z-50"
+      className="fixed inset-0 pointer-events-none z-40"
       style={{ opacity: 0.7 }}
     />
   );

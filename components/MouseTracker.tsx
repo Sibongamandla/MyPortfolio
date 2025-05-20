@@ -1,92 +1,65 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
 
 const MouseTracker = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [clicked, setClicked] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [mouseData, setMouseData] = useState({
+    x: 0,
+    y: 0,
+    isDown: false,
+  });
 
+  // Only run after component has mounted
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-
-    const handleMouseDown = () => setClicked(true);
-    const handleMouseUp = () => setClicked(false);
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
+    setIsMounted(true);
   }, []);
 
-  const variants = {
-    default: {
-      x: mousePosition.x - 16,
-      y: mousePosition.y - 16,
-    },
-    clicked: {
-      x: mousePosition.x - 24,
-      y: mousePosition.y - 24,
-      scale: 1.5,
-    },
-  };
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setMouseData((prev) => ({ ...prev, x: e.clientX, y: e.clientY }));
+    };
+
+    const handleMouseDown = () => {
+      setMouseData((prev) => ({ ...prev, isDown: true }));
+    };
+
+    const handleMouseUp = () => {
+      setMouseData((prev) => ({ ...prev, isDown: false }));
+    };
+
+    try {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mousedown", handleMouseDown);
+      window.addEventListener("mouseup", handleMouseUp);
+
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mousedown", handleMouseDown);
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
+    } catch (error) {
+      console.error("Error in MouseTracker event listeners:", error);
+      return () => {};
+    }
+  }, [isMounted]);
+
+  if (!isMounted) return null;
 
   return (
-    <>
-      <motion.div
-        className="cursor-pointer-ring"
-        variants={variants}
-        animate={clicked ? "clicked" : "default"}
-        transition={{
-          type: "spring",
-          stiffness: 200,
-          damping: 15,
-          mass: 0.5,
-        }}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: 32,
-          height: 32,
-          borderRadius: "50%",
-          border: "2px solid rgba(129, 140, 248, 0.8)",
-          pointerEvents: "none",
-          zIndex: 9999,
-          mixBlendMode: "difference",
-        }}
-      />
-      <motion.div
-        className="cursor-dot"
-        style={{
-          position: "fixed",
-          top: mousePosition.y - 4,
-          left: mousePosition.x - 4,
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          backgroundColor: "white",
-          pointerEvents: "none",
-          zIndex: 9999,
-          mixBlendMode: "difference",
-        }}
-        animate={{
-          scale: clicked ? 0.5 : 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 15,
-        }}
-      />
-    </>
+    <div
+      className={`mouse-tracker fixed w-8 h-8 pointer-events-none transition-all duration-200 ease-out rounded-full z-50 ${
+        mouseData.isDown ? "scale-75" : "scale-100"
+      }`}
+      style={{
+        left: mouseData.x - 16,
+        top: mouseData.y - 16,
+        border: "2px solid #fff",
+        opacity: "0.5",
+        transform: `scale(${mouseData.isDown ? 0.75 : 1})`,
+      }}
+    ></div>
   );
 };
 
