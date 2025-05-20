@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { FaLocationArrow } from "react-icons/fa6";
 import { FaGithub, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
@@ -58,7 +59,7 @@ const RecentProjects = () => {
 
           return (
             <div
-              className="lg:min-h-[32.5rem] h-[25rem] flex items-center justify-center sm:w-96 w-[80vw]"
+              className="lg:min-h-[36rem] h-[28rem] flex items-center justify-center sm:w-96 w-[80vw]"
               key={item.id}
             >
               <PinContainer title={item.title} href={item.link}>
@@ -129,7 +130,7 @@ const RecentProjects = () => {
                   {item.des}
                 </p>
 
-                <div className="flex items-center justify-between mt-7 mb-3">
+                <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center">
                     {item.iconLists.map((icon, index) => (
                       <div
@@ -144,11 +145,23 @@ const RecentProjects = () => {
                     ))}
                   </div>
 
+                  {/* View Details Button */}
+                  <Link
+                    href={`/projects/${item.id}`}
+                    className="flex items-center justify-center bg-purple hover:bg-purple/80 text-white px-4 py-2 rounded-md text-sm transition"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    View Details
+                  </Link>
+                </div>
+
+                <div className="flex items-center justify-between mt-3 mb-3">
                   <a
                     href={item.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex justify-center items-center"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <p className="flex lg:text-xl md:text-xs text-sm text-purple">
                       {isGitHubRepo(item.link)
